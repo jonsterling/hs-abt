@@ -10,7 +10,6 @@ module Abt.Tutorial where
 
 import Abt.Class
 import Abt.Types
-import Abt.Concrete.Var
 import Abt.Concrete.LocallyNameless
 
 import Control.Applicative
@@ -65,7 +64,7 @@ instance HEq1 Lang where
 -- representation is not scope-safe (i.e. free variables are permitted), but
 -- that's how we want it.
 --
-example ∷ MonadVar Var m ⇒ m [Var]
+example ∷ M [Var]
 example = do
   x ← fresh
   y ← fresh

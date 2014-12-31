@@ -22,7 +22,6 @@ library
                        Abt.Types.Nat,
                        Abt.Types.HList,
                        Abt.Types.View,
-                       Abt.Concrete.Var
                        Abt.Concrete.LocallyNameless
                        Abt.Tutorial
   -- other-modules:
