@@ -10,12 +10,13 @@ module Abt.Class.Abt
 ) where
 
 import Abt.Types.Nat
-import Abt.Types.HList
 import Abt.Types.View
 import Abt.Class.Monad
 import Abt.Class.Show1
 
-import Control.Applicative
+import Control.Applicative hiding (Const)
+import Data.Vinyl
+import Data.Vinyl.Functor
 import qualified Data.List as L
 
 -- | The 'Abt' signature represents mediation between an arbitrary (possibly
@@ -57,7 +58,7 @@ class (Show1 o, Show v) ⇒ Abt (v ∷ *) (o ∷ [Nat] → *) (t ∷ Nat → *) 
   --
   ($$)
     ∷ o ns
-    → HList t ns
+    → Rec t ns
     → t Z
   o $$ es = into $ o :$ es
   infixl 1 $$
@@ -75,7 +76,7 @@ class (Show1 o, Show v) ⇒ Abt (v ∷ *) (o ∷ [Nat] → *) (t ∷ Nat → *) 
     case oe' of
       V v' → return $ if v == v' then e else e'
       v' :\ e'' → (v' \\) <$> subst e v e''
-      o :$ es → (o $$) <$> subst e v `htraverse` es
+      o :$ es → (o $$) <$> subst e v `rtraverse` es
 
   -- | Instantiate the bound variable of an abstraction.
   --
@@ -101,9 +102,9 @@ class (Show1 o, Show v) ⇒ Abt (v ∷ *) (o ∷ [Nat] → *) (t ∷ Nat → *) 
       v :\ e' → do
         L.delete v <$>
           freeVars e'
-      o :$ es → do
-        concat <$>
-          homogenizeA freeVars es
+      _ :$ es →
+        fmap concat . sequence . recordToList $
+          Const . freeVars <<$>> es
 
   -- | Render a term into a human-readable string.
   --
@@ -115,10 +116,10 @@ class (Show1 o, Show v) ⇒ Abt (v ∷ *) (o ∷ [Nat] → *) (t ∷ Nat → *) 
     vu ← out e
     case vu of
       V v → return $ show v
-      v :\ e → do
-        e' ← toString e
-        return $ show v ++ "." ++ e'
+      v :\ e' → do
+        estr ← toString e'
+        return $ show v ++ "." ++ estr
       o :$ es → do
-        es' ← homogenizeA toString es
+        es' ← sequence . recordToList $ Const . toString <<$>> es
         return $ show1 o ++ "[" ++ L.intercalate ";" es' ++ "]"
 

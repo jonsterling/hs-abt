@@ -15,7 +15,6 @@ module Abt.Concrete.LocallyNameless
 ) where
 
 import Abt.Types.Nat
-import Abt.Types.HList
 import Abt.Types.View
 import Abt.Class.HEq1
 import Abt.Class.Show1
@@ -23,6 +22,7 @@ import Abt.Class.Abt
 import Abt.Class.Monad
 
 import Control.Applicative
+import Data.Vinyl
 
 -- | A variable is a De Bruijn index, optionally decorated with a display name.
 data Var
@@ -77,8 +77,7 @@ data Tm (o ∷ [Nat] → *) (n ∷ Nat) where
   Free ∷ Var → Tm0 o
   Bound ∷ Int → Tm0 o
   Abs ∷ Tm o n → Tm o (S n)
-  App ∷ o ns → HList (Tm o) ns → Tm0 o
-
+  App ∷ o ns → Rec (Tm o) ns → Tm0 o
 
 -- | First order terms (i.e. terms not headed by abstractions).
 --
@@ -100,7 +99,7 @@ shiftVar v n = \case
   Free v' → if v == v' then Bound n else Free v'
   Bound m → Bound m
   Abs e → Abs $ shiftVar v (n + 1) e
-  App p es → App p $ hmap (shiftVar v n) es
+  App p es → App p $ rmap (shiftVar v n) es
 
 addVar
   ∷ Var
@@ -111,7 +110,7 @@ addVar v n = \case
   Free v' → Free v'
   Bound m → if m == n then Free v else Bound m
   Abs e → Abs $ addVar v (n + 1) e
-  App p es → App p $ hmap (addVar v n) es
+  App p es → App p $ rmap (addVar v n) es
 
 instance Show1 o ⇒ Abt Var o (Tm o) where
   into = \case
@@ -121,7 +120,7 @@ instance Show1 o ⇒ Abt Var o (Tm o) where
 
   out = \case
     Free v → return $ V v
-    Bound n → fail "bound variable occured in out"
+    Bound _ → fail "bound variable occured in out"
     Abs e → do
       v ← fresh
       return $ v :\ addVar v 0 e

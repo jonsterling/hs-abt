@@ -8,7 +8,7 @@ module Abt.Class.Show1 where
 --
 class Show1 f where
   showsPrec1 ∷ Int → f i → ShowS
-  showsPrec1 i x = (show1 x ++)
+  showsPrec1 _ x = (show1 x ++)
 
   show1 ∷ f i → String
   show1 x = showsPrec1 0 x ""

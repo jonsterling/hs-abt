@@ -1,15 +1,13 @@
 name:                abt
-version:             0.1.0.0
+version:             0.1.0.1
 synopsis:            Abstract binding trees for Haskell
 description:         A Haskell port of the Carnegie Mellon ABT library (SML), with some improvements.
 license:             MIT
 license-file:        LICENSE
 author:              Jonathan Sterling
 maintainer:          jon@jonmsterling.com
--- copyright:
 category:            Language
 build-type:          Simple
--- extra-source-files:
 cabal-version:       >=1.10
 
 library
@@ -20,13 +18,12 @@ library
                        Abt.Class.Abt,
                        Abt.Types,
                        Abt.Types.Nat,
-                       Abt.Types.HList,
                        Abt.Types.View,
                        Abt.Concrete.LocallyNameless
                        Abt.Tutorial
-  -- other-modules:
-  -- other-extensions:
   build-depends:       base >=4.7 && <4.8,
+                       vinyl >=0.5,
                        transformers
+  ghc-options:         -Wall
   hs-source-dirs:      src
   default-language:    Haskell2010

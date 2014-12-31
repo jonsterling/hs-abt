@@ -16,6 +16,7 @@ import Abt.Concrete.LocallyNameless
 import Control.Applicative
 import Control.Monad.Trans.State.Strict
 import Control.Monad.Trans.Maybe
+import Data.Vinyl
 
 -- | We'll start off with a monad in which to manipulate ABTs; we'll need some
 -- state for fresh variable generation.
@@ -85,13 +86,13 @@ step
   → StepT M (Tm0 Lang)
 step tm =
   out tm >>= \case
-    Ap :$ m :* n :* Nil →
+    Ap :$ m :& n :& RNil →
       out m >>= \case
-        Lam :$ xe :* Nil → xe // n
+        Lam :$ xe :& RNil → xe // n
         _ → app <$> step m <*> pure n <|> app <$> pure m <*> step n
           where
-            app a b = Ap $$ a :* b :* Nil
-    e → stepsExhausted
+            app a b = Ap $$ a :& b :& RNil
+    _ → stepsExhausted
 
 -- | The reflexive-transitive closure of a small-step operational semantics.
 --
@@ -113,14 +114,14 @@ eval = runM . star step
 identityTm ∷ M (Tm0 Lang)
 identityTm = do
   x ← fresh
-  return $ Lam $$ x \\ var x :* Nil
+  return $ Lam $$ (x \\ var x) :& RNil
 
 -- | @(λx.x)(λx.x)@
 --
 appTm ∷ M (Tm0 Lang)
 appTm = do
   tm ← identityTm
-  return $ Ap $$ tm :* tm :* Nil
+  return $ Ap $$ tm :& tm :& RNil
 
 -- | A demonstration of evaluating (and pretty-printing). Output:
 --

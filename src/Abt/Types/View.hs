@@ -12,7 +12,7 @@ module Abt.Types.View
 ) where
 
 import Abt.Types.Nat
-import Abt.Types.HList
+import Data.Vinyl
 
 -- | @v@ is the type of variables; @o@ is the type of operators parameterized
 -- by arities; @n@ is the "higher type"/order of the term (i.e. a term has
@@ -22,7 +22,7 @@ import Abt.Types.HList
 data View (v ∷ *) (o ∷ [Nat] → *) (n ∷ Nat) (φ ∷ Nat → *) where
   V ∷ v → View0 v o φ
   (:\) ∷ v → φ n → View v o (S n) φ
-  (:$) ∷ o ns → HList φ ns → View0 v o φ
+  (:$) ∷ o ns → Rec φ ns → View0 v o φ
 
 infixl 2 :$
 
@@ -39,4 +39,4 @@ mapView
 mapView η = \case
   V v → V v
   v :\ e → v :\ η e
-  o :$ es → o :$ hmap η es
+  o :$ es → o :$ rmap η es
