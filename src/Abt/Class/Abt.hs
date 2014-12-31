@@ -19,7 +19,7 @@ import Control.Applicative
 import qualified Data.List as L
 
 -- | The 'Abt' signature represents mediation between an arbitrary (possibly
--- nameless) term representaion, and a first-order one (the 'View'). Based on
+-- nameless) term representaion, and a simple one (the 'View'). Based on
 -- the (effectful) ismorphism @'into' / 'out'@ between representations, many
 -- operations can be defined generically for arbitrary operator sets, including
 -- substitution and aggregation of free variables.
@@ -31,7 +31,7 @@ class (Show1 o, Show v) ⇒ Abt (v ∷ *) (o ∷ [Nat] → *) (t ∷ Nat → *) 
     ∷ View v o n t
     → t n
 
-  -- | Convert a term into a first-order 'View'.
+  -- | Convert a term into a simple 'View'.
   --
   out
     ∷ MonadVar v m

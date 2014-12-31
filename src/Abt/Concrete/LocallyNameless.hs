@@ -8,6 +8,7 @@
 
 module Abt.Concrete.LocallyNameless
 ( Tm(..)
+, Tm0
 , Var(..)
 , varName
 , varIndex
@@ -70,13 +71,18 @@ varIndex i (Var n j) =
   (\j' → Var n j')
     <$> i j
 
--- | Locally nameless terms with operators in @o@ at arity @n@.
+-- | Locally nameless terms with operators in @o@ at order @n@.
 --
 data Tm (o ∷ [Nat] → *) (n ∷ Nat) where
-  Free ∷ Var → Tm o Z
-  Bound ∷ Int → Tm o Z
+  Free ∷ Var → Tm0 o
+  Bound ∷ Int → Tm0 o
   Abs ∷ Tm o n → Tm o (S n)
-  App ∷ o ns → HList (Tm o) ns → Tm o Z
+  App ∷ o ns → HList (Tm o) ns → Tm0 o
+
+
+-- | First order terms (i.e. terms not headed by abstractions).
+--
+type Tm0 o = Tm o Z
 
 instance HEq1 o ⇒ HEq1 (Tm o) where
   Free v1 === Free v2 = v1 == v2

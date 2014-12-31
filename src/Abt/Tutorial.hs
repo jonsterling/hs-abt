@@ -69,7 +69,9 @@ newtype StepT m α
 
 -- | To indicate that a term is in normal form.
 --
-stepsExhausted ∷ Applicative m ⇒ StepT m α
+stepsExhausted
+  ∷ Applicative m
+  ⇒ StepT m α
 stepsExhausted = StepT . MaybeT $ pure Nothing
 
 instance MonadVar Var m ⇒ MonadVar Var (StepT m) where
@@ -78,7 +80,9 @@ instance MonadVar Var m ⇒ MonadVar Var (StepT m) where
 
 -- | A single evaluation step.
 --
-step ∷ Tm Lang Z → StepT M (Tm Lang Z)
+step
+  ∷ Tm0 Lang
+  → StepT M (Tm0 Lang)
 step tm =
   out tm >>= \case
     Ap :$ m :* n :* Nil →
@@ -101,19 +105,19 @@ star f a =
 
 -- | Evaluate a term to normal form
 --
-eval ∷ Tm Lang Z → Tm Lang Z
+eval ∷ Tm0 Lang → Tm0 Lang
 eval = runM . star step
 
 -- | @λx.x@
 --
-identityTm ∷ M (Tm Lang Z)
+identityTm ∷ M (Tm0 Lang)
 identityTm = do
   x ← fresh
   return $ Lam $$ x \\ var x :* Nil
 
 -- | @(λx.x)(λx.x)@
 --
-appTm ∷ M (Tm Lang Z)
+appTm ∷ M (Tm0 Lang)
 appTm = do
   tm ← identityTm
   return $ Ap $$ tm :* tm :* Nil
