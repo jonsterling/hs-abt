@@ -39,4 +39,4 @@ mapView
 mapView η = \case
   V v → V v
   v :\ e → v :\ η e
-  o :$ es → o :$ rmap η es
+  o :$ es → o :$ η <<$>> es
