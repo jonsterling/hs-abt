@@ -1,0 +1,34 @@
+name:                abt
+version:             0.1.0.0
+-- synopsis:
+-- description:
+license:             MIT
+license-file:        LICENSE
+author:              Jonathan Sterling
+maintainer:          jon@jonmsterling.com
+-- copyright:
+category:            Language
+build-type:          Simple
+-- extra-source-files:
+cabal-version:       >=1.10
+
+library
+  exposed-modules:     Abt.Class,
+                       Abt.Class.Show1,
+                       Abt.Class.HEq1,
+                       Abt.Class.Monad,
+                       Abt.Class.Abt,
+                       Abt.Types,
+                       Abt.Types.Nat,
+                       Abt.Types.HList,
+                       Abt.Types.View,
+                       Abt.Concrete.Var
+                       Abt.Concrete.LocallyNameless
+                       Abt.Tutorial
+  -- other-modules:
+  -- other-extensions:
+  build-depends:       base >=4.7 && <4.8,
+                       transformers,
+                       mtl
+  hs-source-dirs:      src
+  default-language:    Haskell2010
