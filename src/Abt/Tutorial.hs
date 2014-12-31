@@ -81,7 +81,7 @@ instance MonadVar Var m ⇒ MonadVar Var (StepT m) where
 step ∷ Tm Lang Z → StepT M (Tm Lang Z)
 step tm =
   out tm >>= \case
-    Ap :$ (m :* n :* Nil) → do
+    Ap :$ (m :* n :* Nil) →
       out m >>= \case
         Lam :$ (xe :* Nil) → xe // n
         _ → (app <$> step m <*> pure n) <|> (app <$> pure m <*> step n)
@@ -95,7 +95,7 @@ star
   ∷ Monad m
   ⇒ (α → StepT m α)
   → (α → m α)
-star f a = do
+star f a =
   runMaybeT (runStepT $ f a) >>= \case
     Nothing → return a
     Just a' → star f a'
