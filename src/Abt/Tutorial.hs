@@ -13,7 +13,6 @@ import Abt.Types
 import Abt.Concrete.LocallyNameless
 
 import Control.Applicative
-import Control.Monad.Trans
 import Control.Monad.Trans.State.Strict
 
 -- | We'll start off with a monad in which to manipulate ABTs; we'll need some
