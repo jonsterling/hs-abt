@@ -1,5 +1,6 @@
-{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE DataKinds #-}
+{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE LambdaCase #-}
@@ -14,6 +15,7 @@ import Abt.Concrete.LocallyNameless
 
 import Control.Applicative
 import Control.Monad.Trans.State.Strict
+import Control.Monad.Trans.Maybe
 
 -- | We'll start off with a monad in which to manipulate ABTs; we'll need some
 -- state for fresh variable generation.
@@ -58,14 +60,74 @@ instance HEq1 Lang where
   Ap === Ap = True
   _ === _ = False
 
--- | Check out the source to see this example term: note that number of
--- arguments and presence of abstractions is guaranteed by the types.  The
--- representation is not scope-safe (i.e. free variables are permitted), but
--- that's how we want it.
+-- | A monad transformer for small step operational semantics.
 --
-example ∷ M [Var]
-example = do
+newtype StepT m α
+  = StepT
+  { runStepT ∷ MaybeT m α
+  } deriving (Monad, Functor, Applicative, Alternative)
+
+-- | To indicate that a term is in normal form.
+--
+stepsExhausted ∷ Applicative m ⇒ StepT m α
+stepsExhausted = StepT . MaybeT $ pure Nothing
+
+instance MonadVar Var m ⇒ MonadVar Var (StepT m) where
+  fresh = StepT . MaybeT $ Just <$> fresh
+  named str = StepT . MaybeT $ Just <$> named str
+
+-- | A single evaluation step.
+--
+step ∷ Tm Lang Z → StepT M (Tm Lang Z)
+step tm =
+  out tm >>= \case
+    Ap :$ (m :* n :* Nil) → do
+      out m >>= \case
+        Lam :$ (xe :* Nil) → xe // n
+        _ → (app <$> step m <*> pure n) <|> (app <$> pure m <*> step n)
+          where
+            app a b = Ap $$ a :* b :* Nil
+    e → stepsExhausted
+
+-- | The reflexive-transitive closure of a small-step operational semantics.
+--
+star
+  ∷ Monad m
+  ⇒ (α → StepT m α)
+  → (α → m α)
+star f a = do
+  runMaybeT (runStepT $ f a) >>= \case
+    Nothing → return a
+    Just a' → star f a'
+
+-- | Evaluate a term to normal form
+--
+eval ∷ Tm Lang Z → Tm Lang Z
+eval = runM . star step
+
+-- | @λx.x@
+--
+identityTm ∷ M (Tm Lang Z)
+identityTm = do
   x ← fresh
-  y ← fresh
-  let tm = Lam $$ x \\ (Ap $$ var x :* var y :* Nil) :* Nil
-  freeVars tm
+  return $ Lam $$ (x \\ var x) :* Nil
+
+-- | @(λx.x)(λx.x)@
+--
+appTm ∷ M (Tm Lang Z)
+appTm = do
+  tm ← identityTm
+  return $ Ap $$ tm :* tm :* Nil
+
+-- | A demonstration of evaluating (and pretty-printing). Output:
+--
+-- @
+-- ap[lam[\@2.\@2];lam[\@3.\@3]] ~>* lam[\@2.\@2]
+-- @
+--
+main ∷ IO ()
+main = do
+  let mm = runM $ appTm >>= toString
+      mm' = runM $ appTm >>= toString . eval
+  print $ mm ++ " ~>* " ++ mm'
+
