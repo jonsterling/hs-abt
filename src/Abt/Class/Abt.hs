@@ -38,7 +38,7 @@ class (Show1 o, Show v) ⇒ Abt (v ∷ *) (o ∷ [Nat] → *) (t ∷ Nat → *) 
     ⇒ t n
     → m (View v o n t)
 
-  -- | The injection from variables in terms.
+  -- | The injection from variables to terms.
   --
   var
     ∷ v
