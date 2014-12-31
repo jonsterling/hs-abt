@@ -84,7 +84,7 @@ step tm =
     Ap :$ m :* n :* Nil →
       out m >>= \case
         Lam :$ xe :* Nil → xe // n
-        _ → (app <$> step m <*> pure n) <|> (app <$> pure m <*> step n)
+        _ → app <$> step m <*> pure n <|> app <$> pure m <*> step n
           where
             app a b = Ap $$ a :* b :* Nil
     e → stepsExhausted
@@ -96,9 +96,8 @@ star
   ⇒ (α → StepT m α)
   → (α → m α)
 star f a =
-  runMaybeT (runStepT $ f a) >>= \case
-    Nothing → return a
-    Just a' → star f a'
+  runMaybeT (runStepT $ f a) >>=
+    return a `maybe` star f
 
 -- | Evaluate a term to normal form
 --

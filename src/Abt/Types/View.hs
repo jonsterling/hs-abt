@@ -31,7 +31,7 @@ mapView
   ∷ (∀ j. φ j → ψ j) -- ^ a natural transformation @φ → ψ@
   → View v o n φ -- ^ a view at @φ@
   → View v o n ψ
-mapView eta = \case
+mapView η = \case
   V v → V v
-  v :\ e → v :\ eta e
-  o :$ es → o :$ hmap eta es
+  v :\ e → v :\ η e
+  o :$ es → o :$ hmap η es

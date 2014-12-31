@@ -93,7 +93,7 @@ shiftVar
 shiftVar v n = \case
   Free v' → if v == v' then Bound n else Free v'
   Bound m → Bound m
-  Abs e → Abs (shiftVar v (n + 1) e)
+  Abs e → Abs $ shiftVar v (n + 1) e
   App p es → App p $ hmap (shiftVar v n) es
 
 addVar
@@ -104,13 +104,13 @@ addVar
 addVar v n = \case
   Free v' → Free v'
   Bound m → if m == n then Free v else Bound m
-  Abs e → Abs (addVar v (n + 1) e)
+  Abs e → Abs $ addVar v (n + 1) e
   App p es → App p $ hmap (addVar v n) es
 
 instance Show1 o ⇒ Abt Var o (Tm o) where
   into = \case
     V v → Free v
-    v :\ e → Abs (shiftVar v 0 e)
+    v :\ e → Abs $ shiftVar v 0 e
     v :$ es → App v es
 
   out = \case

@@ -51,7 +51,7 @@ class (Show1 o, Show v) ⇒ Abt (v ∷ *) (o ∷ [Nat] → *) (t ∷ Nat → *) 
     ∷ v
     → t n
     → t (S n)
-  v \\ e = into $ (v :\ e)
+  v \\ e = into $ v :\ e
 
   -- | Construct an operator term.
   --
@@ -74,12 +74,8 @@ class (Show1 o, Show v) ⇒ Abt (v ∷ *) (o ∷ [Nat] → *) (t ∷ Nat → *) 
     oe' ← out e'
     case oe' of
       V v' → return $ if v == v' then e else e'
-      v' :\ e'' → do
-        e''' ← subst e v e''
-        return $ v' \\ e'''
-      o :$ es → do
-        es' ← htraverse (subst e v) es
-        return $ o $$ es'
+      v' :\ e'' → (v' \\) <$> subst e v e''
+      o :$ es → (o $$) <$> subst e v `htraverse` es
 
   -- | Instantiate the bound variable of an abstraction.
   --
