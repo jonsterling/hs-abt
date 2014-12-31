@@ -24,7 +24,7 @@ import qualified Data.List as L
 -- operations can be defined generically for arbitrary operator sets, including
 -- substitution and aggregation of free variables.
 --
-class (Show1 o, Show v) ⇒ Abt (v ∷ *) (o ∷ [Nat] → *) (t ∷ Nat → *) | t → v o, o → t where
+class (Show1 o, Show v) ⇒ Abt (v ∷ *) (o ∷ [Nat] → *) (t ∷ Nat → *) | t → v o where
   -- | Convert a 'View' into a term.
   --
   into
