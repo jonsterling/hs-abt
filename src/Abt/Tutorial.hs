@@ -81,9 +81,9 @@ instance MonadVar Var m ⇒ MonadVar Var (StepT m) where
 step ∷ Tm Lang Z → StepT M (Tm Lang Z)
 step tm =
   out tm >>= \case
-    Ap :$ (m :* n :* Nil) →
+    Ap :$ m :* n :* Nil →
       out m >>= \case
-        Lam :$ (xe :* Nil) → xe // n
+        Lam :$ xe :* Nil → xe // n
         _ → (app <$> step m <*> pure n) <|> (app <$> pure m <*> step n)
           where
             app a b = Ap $$ a :* b :* Nil
@@ -110,7 +110,7 @@ eval = runM . star step
 identityTm ∷ M (Tm Lang Z)
 identityTm = do
   x ← fresh
-  return $ Lam $$ (x \\ var x) :* Nil
+  return $ Lam $$ x \\ var x :* Nil
 
 -- | @(λx.x)(λx.x)@
 --

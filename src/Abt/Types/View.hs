@@ -23,6 +23,8 @@ data View (v ∷ *) (o ∷ [Nat] → *) (n ∷ Nat) (φ ∷ Nat → *) where
   (:\) ∷ v → φ n → View v o (S n) φ
   (:$) ∷ o ns → HList φ ns → View v o Z φ
 
+infixl 2 :$
+
 -- | Views are a (higher) functor.
 --
 mapView
