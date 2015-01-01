@@ -126,7 +126,7 @@ identityTm = do
 appTm ∷ M (Tm0 Lang)
 appTm = do
   tm ← identityTm
-  return $ APP $$ tm :& tm :& RNil
+  return $ app tm tm
 
 -- | A demonstration of evaluating (and pretty-printing). Output:
 --
