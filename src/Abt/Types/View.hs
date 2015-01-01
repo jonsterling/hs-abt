@@ -49,7 +49,7 @@ mapView η = \case
 -- | A prism to extract arguments from a proposed operator.
 --
 -- @
--- _ViewOp ∷ HEq1 o ⇒ o ns → Prism' (View0 v o φ) (Rec φ ns)
+-- '_ViewOp' ∷ 'HEq1' o ⇒ o ns → Prism' ('View0' v o φ) ('Rec' φ ns)
 -- @
 --
 _ViewOp

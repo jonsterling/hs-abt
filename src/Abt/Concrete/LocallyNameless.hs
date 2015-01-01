@@ -46,7 +46,7 @@ instance Ord Var where
 -- | A lens for '_varName'.
 --
 -- @
--- varName ∷ Lens' 'Var' ('Maybe' 'String')
+-- 'varName' ∷ Lens' 'Var' ('Maybe' 'String')
 -- @
 --
 varName
@@ -61,7 +61,7 @@ varName i (Var n j) =
 -- | A lens for '_varIndex'.
 --
 -- @
--- varIndex ∷ Lens' 'Var' 'Int'
+-- 'varIndex' ∷ Lens' 'Var' 'Int'
 -- @
 --
 varIndex
@@ -133,7 +133,7 @@ instance Show1 o ⇒ Abt Var o (Tm o) where
 -- | A prism to extract arguments from a proposed operator.
 --
 -- @
--- _TmOp ∷ HEq1 o ⇒ o ns → Prism' (Tm0 o) (Rec (Tm0 o) ns)
+-- '_TmOp' ∷ 'HEq1' o ⇒ o ns → Prism' ('Tm0' o) ('Rec' ('Tm0' o) ns)
 -- @
 --
 _TmOp
