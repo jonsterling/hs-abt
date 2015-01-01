@@ -5,6 +5,7 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE UnicodeSyntax #-}
 
 module Abt.Tutorial where
@@ -48,18 +49,24 @@ instance MonadVar Var M where
 -- indexed by arities.
 --
 data Lang ns where
-  Lam ∷ Lang '[S Z]
-  Ap ∷ Lang '[Z,Z]
+  LAM ∷ Lang '[S Z]
+  APP ∷ Lang '[Z,Z]
 
 instance Show1 Lang where
   show1 = \case
-    Lam → "lam"
-    Ap → "ap"
+    LAM → "lam"
+    APP → "ap"
 
 instance HEq1 Lang where
-  Lam === Lam = True
-  Ap === Ap = True
+  LAM === LAM = True
+  APP === APP = True
   _ === _ = False
+
+lam ∷ Tm Lang (S Z) → Tm0 Lang
+lam e = LAM $$ e :& RNil
+
+app ∷ Tm0 Lang → Tm0 Lang → Tm0 Lang
+app m n = APP $$ m :& n :& RNil
 
 -- | A monad transformer for small step operational semantics.
 --
@@ -86,12 +93,10 @@ step
   → StepT M (Tm0 Lang)
 step tm =
   out tm >>= \case
-    Ap :$ m :& n :& RNil →
+    APP :$ m :& n :& RNil →
       out m >>= \case
-        Lam :$ xe :& RNil → xe // n
+        LAM :$ xe :& RNil → xe // n
         _ → app <$> step m <*> pure n <|> app <$> pure m <*> step n
-          where
-            app a b = Ap $$ a :& b :& RNil
     _ → stepsExhausted
 
 -- | The reflexive-transitive closure of a small-step operational semantics.
@@ -114,14 +119,14 @@ eval = runM . star step
 identityTm ∷ M (Tm0 Lang)
 identityTm = do
   x ← fresh
-  return $ Lam $$ (x \\ var x) :& RNil
+  return $ lam (x \\ var x)
 
 -- | @(λx.x)(λx.x)@
 --
 appTm ∷ M (Tm0 Lang)
 appTm = do
   tm ← identityTm
-  return $ Ap $$ tm :& tm :& RNil
+  return $ APP $$ tm :& tm :& RNil
 
 -- | A demonstration of evaluating (and pretty-printing). Output:
 --
@@ -130,8 +135,10 @@ appTm = do
 -- @
 --
 main ∷ IO ()
-main = do
-  let mm = runM $ appTm >>= toString
-      mm' = runM $ appTm >>= toString . eval
-  print $ mm ++ " ~>* " ++ mm'
+main =
+  print . runM $ do
+    mm ← appTm
+    mmStr ← toString mm
+    mmStr' ← toString $ eval mm
+    return $ mmStr ++ " ~>* " ++ mmStr'
 
