@@ -119,6 +119,7 @@ class (Show1 o, Show v) ⇒ Abt (v ∷ *) (o ∷ [Nat] → *) (t ∷ Nat → *) 
       v :\ e' → do
         estr ← toString e'
         return $ show v ++ "." ++ estr
+      o :$ RNil → return $ show1 o
       o :$ es → do
         es' ← sequence . recordToList $ Const . toString <<$>> es
         return $ show1 o ++ "[" ++ L.intercalate ";" es' ++ "]"
