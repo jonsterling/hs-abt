@@ -99,7 +99,7 @@ class (Show1 o, Show v) ⇒ Abt (v ∷ *) (o ∷ [Nat] → *) (t ∷ Nat → *) 
     oe ← out e
     case oe of
       V v → return [v]
-      v :\ e' → do
+      v :\ e' →
         L.delete v <$>
           freeVars e'
       _ :$ es →
