@@ -9,6 +9,7 @@
 module Abt.Concrete.LocallyNameless
 ( Tm(..)
 , Tm0
+, _TmOp
 , Var(..)
 , varName
 , varIndex
@@ -22,6 +23,7 @@ import Abt.Class.Abt
 import Abt.Class.Monad
 
 import Control.Applicative
+import Data.Profunctor
 import Data.Vinyl
 
 -- | A variable is a De Bruijn index, optionally decorated with a display name.
@@ -44,7 +46,7 @@ instance Ord Var where
 -- | A lens for '_varName'.
 --
 -- @
--- varName ∷ Lens' 'Var' ('Maybe' 'String')
+-- 'varName' ∷ Lens' 'Var' ('Maybe' 'String')
 -- @
 --
 varName
@@ -59,7 +61,7 @@ varName i (Var n j) =
 -- | A lens for '_varIndex'.
 --
 -- @
--- varIndex ∷ Lens' 'Var' 'Int'
+-- 'varIndex' ∷ Lens' 'Var' 'Int'
 -- @
 --
 varIndex
@@ -84,11 +86,13 @@ data Tm (o ∷ [Nat] → *) (n ∷ Nat) where
 type Tm0 o = Tm o Z
 
 instance HEq1 o ⇒ HEq1 (Tm o) where
-  Free v1 === Free v2 = v1 == v2
-  Bound m === Bound n = m == n
-  Abs e1 === Abs e2 = e1 === e2
-  App o1 es1 === App o2 es2 = o1 === o2 && es1 === es2
-  _ === _ = False
+  heq1 (Free v1) (Free v2) | v1 == v2 = Just Refl
+  heq1 (Bound m) (Bound n) | m == n = Just Refl
+  heq1 (Abs e1) (Abs e2) = cong <$> heq1 e1 e2
+  heq1 (App o1 es1) (App o2 es2)
+    | Just Refl ← heq1 o1 o2
+    , Just Refl ← heq1 es1 es2 = Just Refl
+  heq1 _ _ = Nothing
 
 shiftVar
   ∷ Var
@@ -125,3 +129,23 @@ instance Show1 o ⇒ Abt Var o (Tm o) where
       v ← fresh
       return $ v :\ addVar v 0 e
     App p es → return $ p :$ es
+
+-- | A prism to extract arguments from a proposed operator.
+--
+-- @
+-- '_TmOp' ∷ 'HEq1' o ⇒ o ns → Prism' ('Tm0' o) ('Rec' ('Tm0' o) ns)
+-- @
+--
+_TmOp
+  ∷ ( Choice p
+    , Applicative f
+    , HEq1 o
+    )
+  ⇒ o ns
+  → p (Rec (Tm o) ns) (f (Rec (Tm o) ns))
+  → p (Tm0 o) (f (Tm0 o))
+_TmOp o = dimap fro (either pure (fmap (App o))) . right'
+  where
+    fro = \case
+      App o' es | Just Refl ← heq1 o o' → Right es
+      e → Left e
