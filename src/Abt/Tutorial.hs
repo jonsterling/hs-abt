@@ -58,9 +58,9 @@ instance Show1 Lang where
     APP → "ap"
 
 instance HEq1 Lang where
-  LAM === LAM = True
-  APP === APP = True
-  _ === _ = False
+  heq1 LAM LAM = Just Refl
+  heq1 APP APP = Just Refl
+  heq1 _ _ = Nothing
 
 lam ∷ Tm Lang (S Z) → Tm0 Lang
 lam e = LAM $$ e :& RNil

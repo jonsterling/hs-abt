@@ -8,10 +8,15 @@
 module Abt.Types.View
 ( View(..)
 , View0
+, _ViewOp
 , mapView
 ) where
 
+import Abt.Class.HEq1
 import Abt.Types.Nat
+
+import Control.Applicative
+import Data.Profunctor
 import Data.Vinyl
 
 -- | @v@ is the type of variables; @o@ is the type of operators parameterized
@@ -40,3 +45,23 @@ mapView η = \case
   V v → V v
   v :\ e → v :\ η e
   o :$ es → o :$ η <<$>> es
+
+-- | A prism to extract arguments from a proposed operator.
+--
+-- @
+-- _ViewOp ∷ HEq1 o ⇒ o ns → Prism' (View0 v o φ) (Rec φ ns)
+-- @
+--
+_ViewOp
+  ∷ ( Choice p
+    , Applicative f
+    , HEq1 o
+    )
+  ⇒ o ns
+  → p (Rec φ ns) (f (Rec φ ns))
+  → p (View0 v o φ) (f (View0 v o φ))
+_ViewOp o = dimap fro (either pure (fmap (o :$))) . right'
+  where
+    fro = \case
+      o' :$ es | Just Refl ← heq1 o o' → Right es
+      e → Left e
