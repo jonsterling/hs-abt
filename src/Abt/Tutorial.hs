@@ -131,7 +131,7 @@ appTm = do
 -- | A demonstration of evaluating (and pretty-printing). Output:
 --
 -- @
--- ap[lam[\@2.\@2];lam[\@3.\@3]] ~>* lam[\@2.\@2]
+-- ap[lam[\@2.\@2];lam[\@3.\@3]] ~>* lam[\@4.\@4]
 -- @
 --
 main ∷ IO ()
