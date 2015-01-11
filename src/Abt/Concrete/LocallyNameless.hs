@@ -1,9 +1,11 @@
 {-# LANGUAGE DataKinds #-}
+{-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE UnicodeSyntax #-}
 
 module Abt.Concrete.LocallyNameless
@@ -24,6 +26,7 @@ import Abt.Class.Monad
 
 import Control.Applicative
 import Data.Profunctor
+import Data.Typeable hiding (Refl)
 import Data.Vinyl
 
 -- | A variable is a De Bruijn index, optionally decorated with a display name.
@@ -31,7 +34,7 @@ data Var
   = Var
   { _varName ∷ !(Maybe String)
   , _varIndex ∷ !Int
-  }
+  } deriving Typeable
 
 instance Show Var where
   show (Var (Just v) _) = v
@@ -80,6 +83,8 @@ data Tm (o ∷ [Nat] → *) (n ∷ Nat) where
   Bound ∷ Int → Tm0 o
   Abs ∷ Tm o n → Tm o (S n)
   App ∷ o ns → Rec (Tm o) ns → Tm0 o
+
+deriving instance Typeable Tm
 
 -- | First order terms (i.e. terms not headed by abstractions).
 --
