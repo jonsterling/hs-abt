@@ -20,7 +20,7 @@ import Data.Profunctor
 import Data.Vinyl
 
 -- | @v@ is the type of variables; @o@ is the type of operators parameterized
--- by arities; @n@ is the "higher type"/order of the term (i.e. a term has
+-- by arities; @n@ is the "higher type"/valence of the term (i.e. a term has
 -- @n=0@, a single binding has @n=1@, etc.); @φ@ is the functor which
 -- interprets the inner structure of the view.
 --
