@@ -48,6 +48,11 @@ instance MonadVar Var M where
     v ← fresh
     return $ v { _varName = Just a }
 
+  clone v =
+    case _varName v of
+      Just s -> named s
+      _ -> fresh
+
 -- | Next, we'll define the operators for a tiny lambda calculus as a datatype
 -- indexed by arities.
 --
@@ -106,6 +111,7 @@ stepsExhausted = StepT . MaybeT $ pure Nothing
 instance MonadVar Var m ⇒ MonadVar Var (StepT m) where
   fresh = StepT . MaybeT $ Just <$> fresh
   named str = StepT . MaybeT $ Just <$> named str
+  clone v = StepT . MaybeT $ Just <$> clone v
 
 -- | A single evaluation step.
 --
@@ -144,6 +150,7 @@ newtype JudgeT m α
 instance MonadVar Var m ⇒ MonadVar Var (JudgeT m) where
   fresh = JudgeT . ExceptT $ Right <$> fresh
   named str = JudgeT . ExceptT $ Right <$> named str
+  clone v = JudgeT . ExceptT $ Right <$> clone v
 
 type Ctx = [(Var, Tm0 Lang)]
 
@@ -191,7 +198,7 @@ inferTy g tm = do
 --
 identityTm ∷ M (Tm0 Lang)
 identityTm = do
-  x ← fresh
+  x ← named "x"
   return $ lam (x \\ var x)
 
 -- | @(λx.x)(λx.x)@
@@ -213,6 +220,11 @@ main = do
   either fail print . runM . runExceptT . runJudgeT $ do
     x ← fresh
     checkTy [] (lam (x \\ var x)) (pi unit (x \\ unit))
+
+  print . runM $ do
+    im <- identityTm
+    imStr <- toString im
+    return imStr
 
   print . runM $ do
     mm ← appTm

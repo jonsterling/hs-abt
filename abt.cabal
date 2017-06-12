@@ -26,7 +26,7 @@ library
                        Abt.Types.View,
                        Abt.Concrete.LocallyNameless
                        Abt.Tutorial
-  build-depends:       base >=4.7 && <4.8,
+  build-depends:       base >=4.7 && <4.10,
                        vinyl >=0.5,
                        profunctors >=4.3.2,
                        transformers >=0.2,

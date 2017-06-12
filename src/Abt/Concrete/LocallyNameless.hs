@@ -81,7 +81,7 @@ varIndex i (Var n j) =
 data Tm (o ∷ [Nat] → *) (n ∷ Nat) where
   Free ∷ Var → Tm0 o
   Bound ∷ Int → Tm0 o
-  Abs ∷ Tm o n → Tm o (S n)
+  Abs ∷ Var → Tm o n → Tm o (S n)
   App ∷ o ns → Rec (Tm o) ns → Tm0 o
 
 deriving instance Typeable Tm
@@ -93,7 +93,7 @@ type Tm0 o = Tm o Z
 instance HEq1 o ⇒ HEq1 (Tm o) where
   heq1 (Free v1) (Free v2) | v1 == v2 = Just Refl
   heq1 (Bound m) (Bound n) | m == n = Just Refl
-  heq1 (Abs e1) (Abs e2) = cong <$> heq1 e1 e2
+  heq1 (Abs _ e1) (Abs _ e2) = cong <$> heq1 e1 e2
   heq1 (App o1 es1) (App o2 es2)
     | Just Refl ← heq1 o1 o2
     , Just Refl ← heq1 es1 es2 = Just Refl
@@ -107,7 +107,7 @@ shiftVar
 shiftVar v n = \case
   Free v' → if v == v' then Bound n else Free v'
   Bound m → Bound m
-  Abs e → Abs $ shiftVar v (n + 1) e
+  Abs x e → Abs x $ shiftVar v (n + 1) e
   App p es → App p $ shiftVar v n <<$>> es
 
 addVar
@@ -118,21 +118,21 @@ addVar
 addVar v n = \case
   Free v' → Free v'
   Bound m → if m == n then Free v else Bound m
-  Abs e → Abs $ addVar v (n + 1) e
+  Abs x e → Abs x $ addVar v (n + 1) e
   App p es → App p $ addVar v n <<$>> es
 
 instance Show1 o ⇒ Abt Var o (Tm o) where
   into = \case
     V v → Free v
-    v :\ e → Abs $ shiftVar v 0 e
+    v :\ e → Abs v $ shiftVar v 0 e
     v :$ es → App v es
 
   out = \case
     Free v → return $ V v
     Bound _ → fail "bound variable occured in out"
-    Abs e → do
-      v ← fresh
-      return $ v :\ addVar v 0 e
+    Abs x e → do
+      x' ← clone x
+      return $ x' :\ addVar x' 0 e
     App p es → return $ p :$ es
 
 -- | A prism to extract arguments from a proposed operator.

@@ -12,3 +12,6 @@ class (Ord v, Eq v, Show v, Monad m, Applicative m) ⇒ MonadVar v m | m → v w
 
   -- | Generates a fresh variable tagged with a name
   named ∷ String → m v
+
+  -- | Clones a variable with a name
+  clone :: v → m v
