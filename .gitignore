@@ -5,3 +5,4 @@ cabal.sandbox.config
 *.log
 *.toc
 *~
+.stack-work
