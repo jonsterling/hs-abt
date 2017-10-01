@@ -11,5 +11,3 @@ import Abt.Class.Abt
 import Abt.Class.Monad
 import Abt.Class.Show1
 import Abt.Class.HEq1
-
-
