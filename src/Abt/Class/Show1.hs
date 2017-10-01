@@ -1,5 +1,4 @@
 {-# LANGUAGE PolyKinds #-}
-{-# LANGUAGE UnicodeSyntax #-}
 
 module Abt.Class.Show1 where
 
@@ -7,9 +6,9 @@ module Abt.Class.Show1 where
 -- 'Data.Functor.Show1' in that it is properly kind polymorphic.
 --
 class Show1 f where
-  showsPrec1 ∷ Int → f i → ShowS
+  showsPrec1 :: Int -> f i -> ShowS
   showsPrec1 _ x = (show1 x ++)
 
-  show1 ∷ f i → String
+  show1 :: f i -> String
   show1 x = showsPrec1 0 x ""
 
